@@ -6,6 +6,7 @@ import {
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
+    sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "./firbase";
 
@@ -17,20 +18,14 @@ export function UserAuthContextProvider( props ) {
     function logIn(email, password) {
         return signInWithEmailAndPassword(auth, email, password);
     }
-    function signUp(email, password) {
-        
-         createUserWithEmailAndPassword(auth, email, password)
-         .then((userCredential) => {
-            // Signed up 
-            const user = userCredential.user;
-            // ...
-          })
-          .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode,errorMessage)
-            // ..
-          });
+    async function signUp(email, password) {
+        const actionCodeSettings = {
+            url: 'https://twitter-xlive.vercel.app',
+            handleCodeInApp: true,
+        };
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(auth.currentUser, actionCodeSettings);
+        return userCredential;
     }
     function logOut() {
         return signOut(auth);
